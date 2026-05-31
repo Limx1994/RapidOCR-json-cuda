@@ -5,5 +5,5 @@ cpp/opencv-static
 cpp/onnxruntime-gpu
 *.7z
 *.dll
-*.onnx
 build-vs2022-cuda/
+!models/*.onnx
