@@ -1,5 +1,5 @@
 #### 离线OCR组件 系列项目：
-- [PaddleOCR-json](https://github.com/hiroi-sora/PaddleOCR-json)
+- [PaddleOCR-json](https://github.com/Limx1994/RapidOCR-json-cuda)
 - **RapidOCR-json**
 
 |                  | PaddleOCR-json                                  | RapidOCR-json            |
@@ -20,7 +20,7 @@
 
 # RapidOCR-json
 
-这是一个基于 [RapidOcrOnnx](https://github.com/RapidAI/RapidOcrOnnx) 的离线图片OCR文字识别程序。通过管道等方式输入本地图片路径，输出识别结果json字符串。适用于 `Win7 x64` 及以上的系统。
+这是一个基于https://github.com/hiroi-sora/RapidOCR-json的离线图片OCR文字识别程序。通过管道等方式输入本地图片路径，输出识别结果json字符串。适用于 `Win7 x64` 及以上的系统。
 
 支持 CUDA GPU 加速，使用 NVIDIA GPU 进行推理可显著提升识别速度。
 
@@ -30,7 +30,7 @@
 
 ## 准备工作
 
-下载 [RapidOCR-json v0.2.0](https://github.com/hiroi-sora/RapidOCR-json/releases/tag/v0.2.0) 并解压，即可。
+下载 [RapidOCR-json v0.2.0](https://github.com/Limx1994/RapidOCR-json-cuda/releases) 并解压，即可。
 
 ### 简单试用
 
@@ -246,14 +246,14 @@ ocr.stop()
 
 ## 感谢
 
-感谢 [RapidAI/RapidOcrOnnx](https://github.com/RapidAI/RapidOcrOnnx) ，没有它就没有本项目。
+感谢 [hiroi-sora/RapidOCR-json](https://github.com/hiroi-sora/RapidOCR-json) ，没有它就没有本项目。
 
 本项目中使用了 [nlohmann/json](https://github.com/nlohmann/json) ：
 > “JSON for Modern C++”
 
 ## 更新日志
 
-#### v0.3.0
+#### v0.3.0  2026.5.31
 - 新功能：CUDA GPU 加速，默认启用（`--GPU=0`）
 - 修复：Python API 中 `printResult` 方法的错误码判断（101误写为100）
 - 改进：VS 2022 兼容性，添加 `/utf-8` 编译选项
