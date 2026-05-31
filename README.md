@@ -30,7 +30,10 @@
 
 ## 准备工作
 
-下载 [RapidOCR-json v0.2.0](https://github.com/Limx1994/RapidOCR-json-cuda/releases) 并解压，即可。
+下载 [RapidOCR-json Releases](https://github.com/Limx1994/RapidOCR-json-cuda/releases) 中最新版本并解压，即可。
+
+- **CPU 版本**：体积小（约 15MB 压缩），无需额外依赖，开箱即用。
+- **CUDA GPU 版本**：体积较大（约 170MB 压缩），需要 NVIDIA GPU 及 CUDA 运行时，识别速度显著更快。
 
 ### 简单试用
 
@@ -102,6 +105,11 @@ RapidOCR_json.exe --GPU=0 --image_path="D:/images/test(1).png"
 例5：（禁用GPU，使用CPU模式）
 ```
 RapidOCR_json.exe --GPU=-1 --image_path="D:/images/test(1).png"
+```
+
+例6：（使用繁体中文识别模型）
+```
+RapidOCR_json.exe --models=models --det=ch_PP-OCRv3_det_infer.onnx --cls=ch_ppocr_mobile_v2.0_cls_infer.onnx --rec=rec_chinese_cht_PP-OCRv3_infer.onnx --keys=dict_chinese_cht.txt --image_path="D:/images/test.png"
 ```
 
 
@@ -203,6 +211,25 @@ RapidOCR_json.exe --GPU=-1 --image_path="D:/images/test(1).png"
 - 通过启动参数-image_dir传入非法编码的路径（含中文）时引起。（中文路径应该先启动程序再输入）
 
 
+## 多语言支持
+
+本项目内置多语言 OCR 模型，通过指定不同的 `rec` 和 `keys` 文件即可切换语言。
+
+| 语言 | rec 模型文件 | keys 字典文件 |
+| ---- | ------------ | ------------- |
+| 简体中文 (V4，推荐) | `rec_ch_PP-OCRv4_infer.onnx` | `dict_chinese.txt` |
+| 简体中文 (V3) | `ch_PP-OCRv3_rec_infer.onnx` | `dict_chinese.txt` | 
+| English | `rec_en_PP-OCRv3_infer.onnx` | `dict_en.txt` |
+| 繁體中文 | `rec_chinese_cht_PP-OCRv3_infer.onnx` | `dict_chinese_cht.txt` |
+| 日本語 | `rec_japan_PP-OCRv3_infer.onnx` | `dict_japan.txt` |
+| 한국어 | `rec_korean_PP-OCRv3_infer.onnx` | `dict_korean.txt` |
+| Русский | `rec_cyrillic_PP-OCRv3_infer.onnx` | `dict_cyrillic.txt` |
+
+> 注意：检测模型 (`det`) 和分类模型 (`cls`) 所有语言共用，仅 `rec` 和 `keys` 需要按语言切换。
+
+完整的模型配置可参考 `models/configs.txt`。
+
+
 ## 通过API调用
 
 ### 1. Python API
@@ -231,18 +258,31 @@ ocr.stop()
 
 详见 [cpp/README.md](cpp)。
 
-### CUDA GPU 加速构建
+### CUDA GPU 加速构建（VS2022，推荐）
 
-1. 安装 [CUDA Toolkit 11.8](https://developer.nvidia.com/cuda-toolkit) 和 [cuDNN 8.x](https://developer.nvidia.com/cudnn)。
-2. 下载 [onnxruntime-gpu 1.14.1](https://github.com/microsoft/onnxruntime/releases/tag/v1.14.1)，解压到 `cpp/onnxruntime-gpu/windows-x64/`。
-3. 安装 Visual Studio 2019 或 2022（需 C++ 桌面开发工作负载）。
-4. 运行 `generate-vs-project.bat`（默认已启用 CUDA），或手动 CMake：
-   ```
-   mkdir build && cd build
-   cmake -G "Visual Studio 17 2022" -A x64 -DOCR_OUTPUT="BIN" -DOCR_ONNX="CUDA" -DOCR_BUILD_CRT="True" ../cpp
-   cmake --build . --config Release
-   ```
-5. 将 `models/` 和 GPU 相关 DLL（onnxruntime.dll、cudnn64_8.dll、cublas64_11.dll 等）复制到输出目录。
+**前置条件：**
+- Visual Studio 2022（需 C++ 桌面开发工作负载）
+- [CUDA Toolkit 11.x](https://developer.nvidia.com/cuda-toolkit)
+- [cuDNN 8.x](https://developer.nvidia.com/cudnn)（需注册 NVIDIA 开发者账号）
+- [onnxruntime-gpu](https://github.com/microsoft/onnxruntime/releases) 对应版本，解压到 `cpp/onnxruntime-gpu/windows-x64/`
+
+**构建步骤：**
+
+```bat
+mkdir build && cd build
+cmake -G "Visual Studio 17 2022" -A x64 -DOCR_OUTPUT="BIN" -DOCR_ONNX="CUDA" -DOCR_BUILD_CRT="True" ../cpp
+cmake --build . --config Release
+```
+
+**或使用 `generate-vs-project.bat`：**
+
+该脚本默认已启用 CUDA（`ONNX_TYPE="CUDA"`）。若需切换为 CPU 构建，将第 42 行的 `set flag=2` 改为 `set flag=1`。
+
+**部署时需复制的文件：**
+- `models/` 目录
+- onnxruntime 相关 DLL（`onnxruntime.dll`、`onnxruntime_providers_cuda.dll` 等）
+- CUDA/cuDNN 运行时 DLL（`cudnn64_8.dll`、`cublas64_11.dll`、`cudart64_110.dll` 等）
+- `zlibwapi.dll`（CUDA 版本需要）
 
 ## 感谢
 
@@ -254,10 +294,14 @@ ocr.stop()
 ## 更新日志
 
 #### v0.3.0  2026.5.31
-- 新功能：CUDA GPU 加速，默认启用（`--GPU=0`）
-- 修复：Python API 中 `printResult` 方法的错误码判断（101误写为100）
+- 新功能：CUDA GPU 加速，默认启用（`--GPU=0`），DbNet 和 CrnnNet 使用 GPU 推理，AngleNet 保持 CPU
+- 新功能：多语言 OCR 支持（简体中文、English、繁體中文、日本語、한국어、Русский）
+- 新功能：Git LFS 管理模型文件和 CUDA 构建产物
+- 新功能：内置 VS2022 CUDA 构建输出（`build-vs2022-cuda/`）
 - 改进：VS 2022 兼容性，添加 `/utf-8` 编译选项
 - 改进：CMake 对 MinGW 和 VS 2022 的 64 位检测兼容
+- 改进：`generate-vs-project.bat` 默认启用 CUDA 构建
+- 修复：Python API 中 `printResult` 方法的错误码判断（101误写为100）
 
 #### v0.2.0 `2023.9.25`
 - 路径识图的key由 `imagePath` 改为 `image_path`
