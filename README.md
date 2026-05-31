@@ -20,7 +20,7 @@
 
 # RapidOCR-json
 
-这是一个基于https://github.com/hiroi-sora/RapidOCR-json的离线图片OCR文字识别程序。通过管道等方式输入本地图片路径，输出识别结果json字符串。适用于 `Win7 x64` 及以上的系统。
+这是一个基于 [PaddleOCR-json](https://github.com/hiroi-sora/RapidOCR-json)的离线图片OCR文字识别程序。通过管道等方式输入本地图片路径，输出识别结果json字符串。适用于 `Win7 x64` 及以上的系统。
 
 支持 CUDA GPU 加速，使用 NVIDIA GPU 进行推理可显著提升识别速度。
 
